@@ -1,0 +1,32 @@
+version: "3.8"
+
+services:
+    app:
+        container_name: commissions-app
+        build: Docker/php-fpm
+        ports:
+            - ${PHP_FPM_PORT:-9000:9000}
+        volumes:
+            - ./app:/var/www
+            - ./logs:/var/www/logs
+        working_dir: /var/www
+        networks:
+            - commissions-network
+
+    nginx:
+        container_name: commissions-nginx
+        restart: always
+        build: Docker/nginx
+        ports:
+            - ${APP_MAIN_PORT:-8080:80}
+        depends_on:
+            - app
+        networks:
+            - commissions-network
+        working_dir: /var/www
+        volumes:
+            - ./logs/nginx:/var/log/nginx:cached
+            - ./app:/var/www
+
+networks:
+    commissions-network:
